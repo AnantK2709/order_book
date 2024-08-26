@@ -16,9 +16,9 @@ struct OrderBook {
     OrderBookSide asks;
 };
 
-// Function to fetch snapshot data
+// Fetching snapshot of the order book
 OrderBook fetchSnapshot(const string& symbol) {
-    string url = "https://api.binance.com/api/v3/depth?symbol=" + symbol + "&limit=100";
+    string url = "https://api.binance.com/api/v3/depth?symbol=" + symbol + "&limit=100"; // Api call to 100 levels
     cpr::Response r = cpr::Get(cpr::Url{url});
     OrderBook orderBook;
 
@@ -43,19 +43,19 @@ OrderBook fetchSnapshot(const string& symbol) {
     return orderBook;
 }
 
-// Function to update the order book based on WebSocket updates
+// Updating the order book with the new data
 void updateOrderBook(OrderBook& orderBook, const nlohmann::json& update) {
-    for (const auto& bid : update["b"]) {
+    for (const auto& bid : update["b"]) {  // "b" for bids as per documentation
         double price = stod(bid[0].get<string>());
         double quantity = stod(bid[1].get<string>());
         if (quantity == 0.0) {
-            orderBook.bids.erase(price);
+            orderBook.bids.erase(price);  // Erase the price level if quantity is 0
         } else {
-            orderBook.bids[price] = quantity;
+            orderBook.bids[price] = quantity; // Update the quantity
         }
     }
 
-    for (const auto& ask : update["a"]) {
+    for (const auto& ask : update["a"]) { // "a" for asks as per documentation
         double price = stod(ask[0].get<string>());
         double quantity = stod(ask[1].get<string>());
         if (quantity == 0.0) {
@@ -66,7 +66,7 @@ void updateOrderBook(OrderBook& orderBook, const nlohmann::json& update) {
     }
 }
 
-// Function to display the top 5 levels of the order book
+// displaying the top 5 levels of the order book
 void displayOrderBook(const OrderBook& orderBook) {
     cout << "Top 5 Bids:" << endl;
     int count = 0;
